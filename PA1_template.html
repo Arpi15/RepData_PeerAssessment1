@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=9" >
+
+<title>Loading and Preprocessing the data</title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+
+
+
+
+</head>
+
+<body>
+<p>This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.</p>
+
+<p>The variables included in this dataset are:</p>
+
+<ul>
+<li>steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)</li>
+<li>date: The date on which the measurement was taken in YYYY-MM-DD format</li>
+<li>interval: Identifier for the 5-minute interval in which measurement was taken</li>
+</ul>
+
+<h2>Loading and Preprocessing the data</h2>
+
+<p>So, to begin with we will first load the dataset :</p>
+
+<pre><code class="r, echo=TRUE">activity &lt;- read.csv(&quot;~/Desktop/coursera/activity.csv&quot;, stringsAsFactors = FALSE, header = TRUE)
+</code></pre>
+
+<p>Now that our dataset is in the variable &ldquo;activity&rdquo;, we will do some basic processing with the data:</p>
+
+<pre><code class="r, echo=TRUE">head(activity)  
+tail(activity)
+str(activity)
+dim(activity)
+</code></pre>
+
+<h2>What is mean total number of steps taken per day?</h2>
+
+<p>For this part we will first calculate the total number of steps taken per day using &ldquo;tapply&rdquo; function:</p>
+
+<pre><code class="r, echo=TRUE">totalsteps_perday &lt;- tapply(activity$steps, activity$date, sum)
+</code></pre>
+
+<p>Then, we will plot a histogram for total number of steps taken per day</p>
+
+<pre><code class="r, echo=TRUE">hist(totalsteps_perday, xlab = &quot;Total Steps&quot;, main = &quot;Histogram of Total number of Steps taken per day&quot;) 
+</code></pre>
+
+<p>Now, we will calculate the mean and the median for total number of steps taken per day after removing the missing values from the dataset:</p>
+
+<pre><code class="r, echo=TRUE">mean1 &lt;- mean(totalsteps_perday, na.rm = TRUE)
+mean1
+median1 &lt;- median(totalsteps_perday, na.rm = TRUE)
+median1
+</code></pre>
+
+<h2>What is the average daily activity pattern?</h2>
+
+<p>For this, we need to find the average daily activity.We will do this using aggregate function:</p>
+
+<pre><code class="r, echo=TRUE">avg_daily_activity &lt;- aggregate(steps ~ interval, mean, data = activity, na.rm = TRUE) 
+</code></pre>
+
+<p>Now, we will make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis) :</p>
+
+<pre><code class="r, echo=TRUE">plot(avg_daily_activity$interval, avg_daily_activity$steps, type = &quot;l&quot;, xlab = &quot;Interval&quot;, ylab = &quot;Average number of steps&quot;, main = &quot;Average activity across all days&quot;)
+</code></pre>
+
+<p>Now, for finding the 5-minute interval, on average across all the days in the dataset, containing the maximum number of steps, we will use which.max function to first find the row id and then fetching the 5-minute interval using the row id:</p>
+
+<pre><code class="r, echo=TRUE">max_row_id &lt;- which.max(avg_daily_activity$steps)   
+max_row_id
+avg_daily_activity[max_row_id, ]
+</code></pre>
+
+<p>##Imputing missing values</p>
+
+<p>For this part, as we can see that the original dataset contains a lot of missing (NA) values, so first we need to find the total number of missing values in the dataset and then devise a strategy to fill in those missing values which we will see later:</p>
+
+<pre><code class="r, echo=TRUE">missing_values &lt;- !complete.cases(activity)       
+sum(missing_values)
+</code></pre>
+
+<p>So, we can see that the original dataset contains 2304 missing values.
+Now, to fill those missing values we will calculate the mean for 5-minute interval and fill the missing values:</p>
+
+<pre><code class="r, echo=TRUE">for(i in 1:nrow(activity))
+{if(is.na(activity$steps[i]))         
+{ interval_val &lt;- activity$interval[i]
+  row_id &lt;- which(avg_daily_activity$interval == interval_val)
+  steps_val &lt;- avg_daily_activity$steps[row_id]
+  activity$steps[i] &lt;- steps_val
+}                       
+}
+</code></pre>
+
+<p>So, what we have done here is we have checked NA values for each row in steps and replaced it with mean of steps which we have already calculated during average daily activity.Now our new dataset has all the missing values filled in.</p>
+
+<pre><code class="r, echo=TRUE">head(activity)
+</code></pre>
+
+<p>Now, we will make a histogram of the total number of steps taken each day and Calculate the mean and median total number of steps taken per day.For calculating the total number of steps per day we will use the same method using tapply.</p>
+
+<pre><code class="r, echo=TRUE">totalsteps_perday_imputed &lt;- tapply(activity$steps, activity$date, sum)
+hist(totalsteps_perday_imputed, xlab = &quot;Total Steps&quot;, main = &quot;Histogram of Total number of Steps taken per day (Imputed)&quot;)
+</code></pre>
+
+<p>We can see that in the new histogram frequency values have changed from 25 to 35.
+Now we will calculate the new mean and median.</p>
+
+<pre><code class="r, echo=TRUE">mean &lt;- mean(totalsteps_perday_imputed)
+mean
+median &lt;- median(totalsteps_perday_imputed) 
+median
+</code></pre>
+
+<p>For the new dataset, median values have changed from 10765 to 10766.19</p>
+
+<p>##Are there differences in activity patterns between weekdays and weekends?</p>
+
+<p>For this part of the question we have to first find whether a particular date is weekday or a weekend.For this, we will take the help of weekdays function.We will use the new dataset with filled in values for this part.</p>
+
+<pre><code class="r, echo=TRUE">day &lt;- weekdays(as.Date(activity$date)) 
+daylevel &lt;- vector()               
+for(i in 1:nrow(activity))
+        {
+        if (day[i] == &quot;Saturday&quot;)
+       {daylevel[i] &lt;- &quot;Weekend&quot;}
+
+ else if (day[i] == &quot;Sunday&quot;)
+        {daylevel[i] &lt;- &quot;Weekend&quot;}
+else 
+{daylevel[i] &lt;- &quot;Weekday&quot;}
+}
+
+activity$daylevel &lt;- daylevel
+activity$daylevel &lt;- factor(activity$daylevel)
+head(activity$daylevel)
+</code></pre>
+
+<p>Here, first we have converted &ldquo;date&rdquo;&ldquo; variable to &quot;day&rdquo; using weekdays function.Then we have assigned vector to &ldquo;daylevel&rdquo; variable.After that we are checking for each day if it&#39;s a Saturday or Sunday.If it&#39;s Saturday or Sunday we are assigning it to &ldquo;Weekend&rdquo; variable otherwise it&#39;s a &ldquo;Weekday&rdquo;.Then we are assigning the &ldquo;daylevel&rdquo; variable to a factor variable.</p>
+
+<p>Now to finish off we will make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).For this, we will use the lattice package.</p>
+
+<p>First we will add the daylevel column to the new dataset using aggregate function:</p>
+
+<pre><code class="r, echo=TRUE">rm(mean)
+steps_by_day &lt;- aggregate(steps ~ interval + daylevel, data = activity, mean)  
+
+</code></pre>
+
+<pre><code class="r, echo=TRUE">
+library(lattice)           
+xyplot(steps ~ interval|daylevel, steps_by_day, type = &quot;l&quot;, layout = c(1, 2), xlab = &quot;Interval&quot;, ylab = &quot;Number of Steps&quot;)
+</code></pre>
+
+</body>
+
+</html>
+
